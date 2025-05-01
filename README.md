@@ -24,3 +24,5 @@ graph TD
     C --> E[(Modelos.joblib)]  
     C --> F[(Banco de Dados)]  
     D --> G[LLM: GPT-3.5/Llama2]
+    F --> C  <!-- ML acessa dados -->
+    F --> D  <!-- Agente consulta dados -->
