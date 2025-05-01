@@ -10,7 +10,7 @@ Integra análise de dados, modelos de Machine Learning e assistente conversacion
 ## 🚀 **Principais Funcionalidades**
 - **Upload e Visualização de Dados**: Suporte a CSV, Excel e conexões SQL
 - **Modelos Preditivos**: Treinamento e inferência em tempo real
-- **Assistente de IA**: Explicações naturais sobre previsões (ex: "Por que as vendas caíram?")
+- **Assistente de IA**: Explicações naturais sobre previsões
 - **Dashboard Interativo**: Gráficos dinâmicos e filtros avançados
 
 ---
