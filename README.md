@@ -21,8 +21,8 @@ graph TD
     A[Frontend React] -->|HTTP| B[Backend FastAPI]
     B --> C[Serviço de ML]
     B --> D[Agente de IA]
-    C --> E[(Modelos.joblib)]  <!-- Só modelos treinados -->
-    C --> F[(Banco de Dados)]  <!-- Novo: dados brutos/processados -->
+    C --> E[(Modelos.joblib)]  
+    C --> F[(Banco de Dados)]  
     D --> G[LLM: GPT-3.5/Llama2]
     F --> C  <-- ML acessa dados -->
     F --> D  <-- Agente consulta dados -->
