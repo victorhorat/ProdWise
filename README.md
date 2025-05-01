@@ -18,8 +18,11 @@ Integra análise de dados, modelos de Machine Learning e assistente conversacion
 ## 🛠 **Arquitetura Técnica**
 ```mermaid
 graph TD
-    A[Frontend React] --> B[Backend FastAPI]
+    A[Frontend React] -->|HTTP| B[Backend FastAPI]
     B --> C[Serviço de ML]
     B --> D[Agente de IA]
-    C --> E[(Modelos.joblib)]
-    D --> F[LLM: GPT-3.5/Llama2]
+    C --> E[(Modelos.joblib)]  <!-- Só modelos treinados -->
+    C --> F[(Banco de Dados)]  <!-- Novo: dados brutos/processados -->
+    D --> G[LLM: GPT-3.5/Llama2]
+    F --> C  <!-- ML acessa dados -->
+    F --> D  <!-- Agente consulta dados -->
