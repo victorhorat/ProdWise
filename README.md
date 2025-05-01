@@ -25,7 +25,7 @@ graph TD
     C --> F[(Banco de Dados)]  
     D --> G[LLM: GPT-3.5/Llama2]
 ```
-
+## 🛠 **Arquitetura Técnica Explicada**
 ```mermaid
 graph TD
     A[Frontend React] -->|HTTP Requests| B[Backend FastAPI]
