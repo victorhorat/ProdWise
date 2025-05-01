@@ -2,7 +2,7 @@
 
 ![ProdWise Logo](https://via.placeholder.com/150x50?text=ProdWise) *(adicione seu logo depois)*
 
-**Sistema de Visualização e Previsão de Dados com IA**  
+**Plataforma de análise preditiva com IA para tomada de decisões baseada em dados”**  
 Integra análise de dados, modelos de Machine Learning e assistente conversacional para insights empresariais.
 
 ---
