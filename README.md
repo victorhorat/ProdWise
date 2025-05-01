@@ -24,3 +24,16 @@ graph TD
     C --> E[(Modelos.joblib)]  
     C --> F[(Banco de Dados)]  
     D --> G[LLM: GPT-3.5/Llama2]
+```
+
+```mermaid
+graph TD
+    A[Frontend React] -->|HTTP Requests| B[Backend FastAPI]
+    B --> C[Serviço de ML]
+    B --> D[Agente de IA]
+    C --> E[(Modelos.joblib)]
+    C --> F[(Banco de Dados\nPostgreSQL/Parquet)]
+    D --> G[LLM\nGPT-3.5/Llama2]
+    F -->|Fornece dados| C
+    F -->|Consulta dados| D
+```
