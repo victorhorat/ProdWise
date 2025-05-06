@@ -37,7 +37,8 @@ graph TD
     F -->|Fornece dados| C
     F -->|Consulta dados| D
 ```
-## 🛠 **Estrutura de pastas**
+## 🏗️**Estruturação de pastas**
+```
 ProdWise/
 ├── app/
 │   ├── __init__.py
@@ -83,3 +84,4 @@ ProdWise/
 ├── .gitignore
 ├── LICENSE
 └── README.md
+```
