@@ -1,13 +1,15 @@
 import sys
 from pathlib import Path
 import pandas as pd
+from datetime import datetime
 
 # Adiciona o diretório raiz ao Python path
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
 
-from app.models import Base
-from app.database import engine
+from app.models.base import Base
+from app.core.database import engine, SessionLocal
+from app.models.dados import DadosConsolidados
 
 def importar_dados():
     # 1. Cria a estrutura do banco usando SQLAlchemy
@@ -17,33 +19,31 @@ def importar_dados():
     csv_path = project_root / "data" / "base.csv"
     df = pd.read_csv(csv_path, encoding='utf-8')
     
-    # Converte datas
-    # No tratamento dos dados, adicione:
-    df['Data'] = pd.to_datetime(df['Data'], format='%Y-%m').dt.strftime('%Y-%m-%d')
+    # 3. Processamento dos dados
+    # Converte datas para formato date (ajustado para o modelo)
+    df['Data'] = pd.to_datetime(df['Data'], format='%Y-%m').dt.date
     
-    
-    # Lista de colunas para tratamento
+    # Lista de colunas para tratamento numérico
     colunas = [
         'Gasolina', 'Etanol', 'IPCA', 'Salario Minimo', 'PIB',
         'Dolar - abertura', 'ESTOQUE(produto A)', 'VENDAS(produto A (mil litros))',
         'ESTOQUE(produto B)', 'VENDAS(produto B (mil litros))', 'Taxa desemprego'
     ]
     
-    # Aplica o mesmo tratamento do Colab
+    # Limpeza e conversão de valores numéricos
     for col in colunas:
         df[col] = (
             df[col]
             .astype(str)
-            .str.replace(' ', '')
-            .str.replace('.', '')
+            .str.replace(r'[^\d,]', '', regex=True)  # Remove tudo exceto números e vírgula
             .str.replace(',', '.')
-            .str.extract(r'([0-9.]+)')[0]
             .astype(float)
         )
     
+    # Ajuste percentual
     df['Taxa desemprego'] = df['Taxa desemprego'] / 100
     
-    # 3. Renomeia colunas para match com o modelo
+    # 4. Renomeia colunas para match com o modelo
     df = df.rename(columns={
         "Data": "data",
         "Gasolina": "gasolina",
@@ -59,16 +59,18 @@ def importar_dados():
         "VENDAS(produto B (mil litros))": "vendas_b"
     })
     
-    # 4. Importa para o banco
-    with engine.connect() as conn:
-        df.to_sql(
-            name="dados_consolidados",
-            con=conn,
-            if_exists="append",
-            index=False
-        )
-    
-    print("✅ Dados importados com sucesso!")
+    # 5. Importa para o banco usando ORM do SQLAlchemy
+    with SessionLocal() as session:
+        try:
+            # Converte cada linha do DataFrame para objetos DadosConsolidados
+            records = [DadosConsolidados(**row) for row in df.to_dict('records')]
+            session.bulk_save_objects(records)
+            session.commit()
+            print(f"✅ Dados importados com sucesso! Total: {len(df)} registros")
+        except Exception as e:
+            session.rollback()
+            print(f"❌ Erro ao importar dados: {str(e)}")
+            raise
 
 if __name__ == "__main__":
     importar_dados()

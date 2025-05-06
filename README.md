@@ -22,7 +22,7 @@ graph TD
     B --> C[Serviço de ML]
     B --> D[Agente de IA]
     C --> E[(Modelos.joblib)]  
-    C --> F[(Banco de Dados)]  
+    C --> F[(SQLite Database)]  
     D --> G[LLM: GPT-3.5/Llama2]
 ```
 ## 🛠 **Arquitetura Técnica Explicada**
@@ -32,8 +32,54 @@ graph TD
     B --> C[Serviço de ML]
     B --> D[Agente de IA]
     C --> E[(Modelos.joblib)]
-    C --> F[(Banco de Dados\nPostgreSQL/Parquet)]
+    C --> F[(SQLite Database)]
     D --> G[LLM\nGPT-3.5/Llama2]
     F -->|Fornece dados| C
     F -->|Consulta dados| D
 ```
+## 🛠 **Estrutura de pastas**
+ProdWise/
+├── app/
+│   ├── __init__.py
+│   ├── core/
+│   │   ├── config.py       # Configurações globais
+│   │   └── database.py     # Conexão com DB (SQLAlchemy)
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── base.py         # Modelos base
+│   │   └── dados.py        # Modelos de dados
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── api.py          # Endpoints FastAPI
+│   │   └── views.py        # Templates (se houver front)
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── data_service.py # Lógica de dados
+│   │   └── ml_service.py   # Serviços de ML
+│   └── main.py             # App FastAPI principal
+│
+├── data/
+│   ├── database.db        
+│   └── base.csv
+│
+├── scripts/
+│   ├── import_csv.py       # Scripts de ETL
+│   └── preprocess.py       # Pré-processamento
+│
+├── tests/                  # Testes automatizados
+│   ├── unit/
+│   └── integration/
+│
+├── infrastructure/
+│   ├── Dockerfile
+│   └── docker-compose.yml
+│
+├── requirements/
+│   ├── base.txt            # Dependências principais
+│   ├── dev.txt             # Dev-only (pytest, etc)
+│   └── prod.txt            # Produção
+│
+├── .env.example            # Template de variáveis
+├── .gitignore
+├── LICENSE
+└── README.md
