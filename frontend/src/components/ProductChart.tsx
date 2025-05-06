@@ -1,5 +1,5 @@
-// src/components/ProductChart.tsx
 'use client';
+
 import { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
@@ -10,9 +10,11 @@ import {
   Title,
   Tooltip,
   Legend,
-  BarElement
+  BarElement,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import zoomPlugin from 'chartjs-plugin-zoom';
+import { ChartOptions } from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
@@ -22,7 +24,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  BarElement
+  BarElement,
+  zoomPlugin
 );
 
 interface ProductData {
@@ -37,7 +40,9 @@ export default function ProductChart() {
   const [chartData, setChartData] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Busca lista de produtos disponíveis
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -52,11 +57,10 @@ export default function ProductChart() {
     fetchProducts();
   }, []);
 
-  // Busca dados do produto selecionado
   useEffect(() => {
     const fetchProductData = async () => {
       if (!selectedProduct) return;
-      
+
       setLoading(true);
       try {
         const response = await fetch(`/api/v1/dados/produto/${selectedProduct.toLowerCase()}`);
@@ -72,77 +76,124 @@ export default function ProductChart() {
     fetchProductData();
   }, [selectedProduct]);
 
+  const filteredData = chartData.filter((item) => {
+    const itemDate = new Date(item.data);
+    const from = startDate ? new Date(startDate) : null;
+    const to = endDate ? new Date(endDate) : null;
+
+    return (!from || itemDate >= from) && (!to || itemDate <= to);
+  });
+
   const data = {
-    labels: chartData.map(item => item.data.substring(0, 7)),
+    labels: filteredData.map((item) => item.data.substring(0, 7)),
     datasets: [
       {
         label: `Vendas Produto ${selectedProduct}`,
-        data: chartData.map(item => item.vendas),
+        data: filteredData.map((item) => item.vendas),
         borderColor: '#3B82F6',
         backgroundColor: 'rgba(59, 130, 246, 0.2)',
         borderWidth: 2,
-        tension: 0.4
+        tension: 0.4,
       },
       {
         label: `Estoque Produto ${selectedProduct}`,
-        data: chartData.map(item => item.estoque),
+        data: filteredData.map((item) => item.estoque),
         borderColor: '#EF4444',
         backgroundColor: 'rgba(239, 68, 68, 0.2)',
         borderWidth: 2,
-        borderDash: [5, 5]
-      }
-    ]
+        borderDash: [5, 5],
+      },
+    ],
   };
 
-  const options = {
+  const options: ChartOptions<'line'> = {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top' as const,
+        display: false, // removida do ChartJS
       },
       title: {
         display: true,
         text: `Análise do Produto ${selectedProduct}`,
-        font: {
-          size: 16
-        }
-      }
+        font: { size: 16 },
+      },
+      zoom: {
+        pan: { enabled: true, mode: 'x' },
+        zoom: {
+          wheel: { enabled: true },
+          pinch: { enabled: true },
+          mode: 'x',
+        },
+      },
     },
     scales: {
       y: {
-        beginAtZero: true
-      }
-    }
+        beginAtZero: true,
+      },
+    },
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="mb-4">
-        <label htmlFor="product-select" className="block text-sm font-medium text-gray-700">
-          Selecione o Produto:
-        </label>
-        <select
-          id="product-select"
-          value={selectedProduct}
-          onChange={(e) => setSelectedProduct(e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-        >
-          {products.map(product => (
-            <option key={product} value={product}>
-              Produto {product}
-            </option>
-          ))}
-        </select>
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col justify-between min-h-[520px]">
+      <div className="flex flex-col lg:flex-row lg:items-end gap-4 mb-6">
+        <div className="flex-1">
+          <label htmlFor="product-select" className="block text-sm font-medium text-gray-700 mb-1">
+            Selecione o Produto:
+          </label>
+          <select
+            id="product-select"
+            value={selectedProduct}
+            onChange={(e) => setSelectedProduct(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm w-full"
+          >
+            {products.map((product) => (
+              <option key={product} value={product}>
+                Produto {product}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex gap-4 flex-1">
+          <div className="flex flex-col w-full">
+            <label className="text-sm font-medium text-gray-700 mb-1">De:</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+          <div className="flex flex-col w-full">
+            <label className="text-sm font-medium text-gray-700 mb-1">Até:</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="h-[400px]">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
-            Carregando dados...
-          </div>
+          <div className="flex items-center justify-center h-full">Carregando dados...</div>
         ) : (
           <Line options={options} data={data} />
         )}
+      </div>
+
+      {/* Legenda manual externa */}
+      <div className="mt-1 flex flex-wrap justify-center gap-3 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="w-4 h-1.5 bg-blue-500 rounded-sm inline-block" />
+          Vendas Produto {selectedProduct}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-4 h-1.5 border-t-2 border-dashed border-red-500 inline-block" />
+          Estoque Produto {selectedProduct}
+        </div>
       </div>
     </div>
   );

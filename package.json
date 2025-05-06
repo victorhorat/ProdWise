@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "chartjs-plugin-zoom": "^2.2.0",
+    "lucide-react": "^0.507.0"
+  }
+}
