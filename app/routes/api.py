@@ -27,3 +27,7 @@ async def dados_produto(produto_id: str, db: Session = Depends(get_db)):
         "estoque": estoque,
         "vendas": vendas
     } for data, estoque, vendas in dados]
+
+@router.get("/produtos")
+async def listar_produtos():
+    return {"produtos": ["A", "B"]}

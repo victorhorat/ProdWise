@@ -18,7 +18,7 @@ Integra análise de dados, modelos de Machine Learning e assistente conversacion
 ## 🛠 **Arquitetura Técnica Simplificada**
 ```mermaid
 graph TD
-    A[Frontend React] -->|HTTP| B[Backend FastAPI]
+    A[Frontend Next.js] -->|HTTP| B[Backend FastAPI]
     B --> C[Serviço de ML]
     B --> D[Agente de IA]
     C --> E[(Modelos.joblib)]  
@@ -28,7 +28,7 @@ graph TD
 ## 🛠 **Arquitetura Técnica Explicada**
 ```mermaid
 graph TD
-    A[Frontend React] -->|HTTP Requests| B[Backend FastAPI]
+    A[Frontend Next.js] -->|HTTP Requests| B[Backend FastAPI]
     B --> C[Serviço de ML]
     B --> D[Agente de IA]
     C --> E[(Modelos.joblib)]
@@ -59,13 +59,28 @@ ProdWise/
 │   │   └── ml_service.py   # Serviços de ML
 │   └── main.py             # App FastAPI principal
 │
+├── frontend/                 # Next.js
+│   ├── public/               # Arquivos estáticos
+│   ├── src/
+│   │   ├── app/              # Roteamento (App Router)
+│   │   │   ├── (dashboard)   # Grupo de rotas
+│   │   │   │   ├── page.tsx  # Página principal
+│   │   │   │   └── layout.tsx
+│   │   ├── components/       # Componentes reutilizáveis
+│   │   ├── lib/              # Utilitários/API calls
+│   │   ├── styles/           # CSS global
+│   │   └── types/            # Tipos TypeScript
+│   ├── next.config.js        # Configuração Next
+│   ├── package.json
+│   └── tsconfig.json
+│
 ├── data/
 │   ├── database.db        
 │   └── base.csv
 │
 ├── scripts/
-│   ├── import_csv.py       # Scripts de ETL
-│   └── preprocess.py       # Pré-processamento
+│   └── import_csv.py    
+│   
 │
 ├── tests/                  # Testes automatizados
 │   ├── unit/
@@ -76,9 +91,7 @@ ProdWise/
 │   └── docker-compose.yml
 │
 ├── requirements/
-│   ├── base.txt            # Dependências principais
-│   ├── dev.txt             # Dev-only (pytest, etc)
-│   └── prod.txt            # Produção
+│   └── base.txt            # Dependências principais
 │
 ├── .env.example            # Template de variáveis
 ├── .gitignore
