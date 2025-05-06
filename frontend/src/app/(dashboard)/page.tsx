@@ -20,7 +20,6 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-10">
-      <h1 className="text-2xl font-bold text-center text-gray-800">Dashboard ProdWise</h1>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         {/* Visão Geral */}
