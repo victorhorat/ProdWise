@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.models.dados import DadosConsolidados
 from app.core.database import get_db
+from app.services.ml_service import MLService
 
 router = APIRouter(prefix="/api/v1")
 
@@ -31,3 +32,62 @@ async def dados_produto(produto_id: str, db: Session = Depends(get_db)):
 @router.get("/produtos")
 async def listar_produtos():
     return {"produtos": ["A", "B"]}
+
+@router.get("/ml/normalize-data")
+async def normalize_data(update_scalers: bool = False, db: Session = Depends(get_db)):
+    ml_service = MLService(db)
+    normalized_data = ml_service.normalize_data(update_scalers=update_scalers)
+    
+    # Extrair informações básicas para retorno (sem os dados completos para evitar resposta muito grande)
+    return {
+        "status": "success",
+        "message": "Dados normalizados com sucesso",
+        "rows_processed": len(normalized_data['original']),
+        "scalers_updated": update_scalers
+    }
+
+@router.get("/ml/product-data/{product_id}")
+async def get_product_data(product_id: str, db: Session = Depends(get_db)):
+    ml_service = MLService(db)
+    try:
+        data = ml_service.get_normalized_product_data(product_id)
+        return {
+            "status": "success",
+            "product_id": product_id,
+            "data_sample": data.to_dict(orient="records")
+        }
+    except ValueError as e:
+        return {"status": "error", "message": str(e)}
+    
+@router.get("/ml/train-model/{product_id}")
+async def train_model(product_id: str, k: int = 8, db: Session = Depends(get_db)):
+    """Endpoint para treinar modelo KNN para um produto específico"""
+    ml_service = MLService(db)
+    try:
+        result = ml_service.train_knn_model(product_id, k)
+        return {
+            "status": "success",
+            "message": f"Modelo KNN para vendas do produto {product_id} treinado com sucesso",
+            "model_info": result
+        }
+    except ValueError as e:
+        return {"status": "error", "message": str(e)}
+
+@router.get("/ml/forecast-2025/{product_id}")
+async def forecast_2025(product_id: str, db: Session = Depends(get_db)):
+    """Endpoint para prever vendas de 2025 para um produto específico"""
+    ml_service = MLService(db)
+    try:
+        forecast_df = ml_service.predict_sales_for_2025(product_id)
+        
+        # Formatar datas para JSON
+        forecast_dict = forecast_df.copy()
+        forecast_dict['data'] = forecast_dict['data'].dt.strftime('%Y-%m-%d')
+        
+        return {
+            "status": "success",
+            "product_id": product_id,
+            "forecast_data": forecast_dict.to_dict(orient="records")
+        }
+    except ValueError as e:
+        return {"status": "error", "message": str(e)}
