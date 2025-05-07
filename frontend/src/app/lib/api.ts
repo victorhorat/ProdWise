@@ -24,6 +24,12 @@ export interface FullData {
   // ... outros campos conforme seu backend
 }
 
+export interface ForecastData {
+  data: string;
+  vendas_a?: number;
+  vendas_b?: number;
+}
+
 // Funções de API
 export const apiService = {
   // Busca dados completos
@@ -38,5 +44,10 @@ export const apiService = {
     return response.data;
   },
 
+    // Nova função para buscar previsões de 2025
+  getProductForecast: async (productId: string): Promise<ForecastData[]> => {
+    const response = await api.get(`/ml/forecast-2025/${productId}`);
+    return response.data.forecast_data;
+  },
   // Adicione outros endpoints conforme necessário
 };

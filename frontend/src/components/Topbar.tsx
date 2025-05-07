@@ -21,14 +21,14 @@ export default function Topbar() {
       {/* Avatar e info do usuário */}
       <div className="flex items-center gap-3">
         <Image
-          src="/avatar.jpg" // Substitua pelo caminho correto da imagem ou avatar padrão
+          src="/perfil_jh.jpg" // Substitua pelo caminho correto da imagem ou avatar padrão
           alt="Usuário"
           width={36}
           height={36}
           className="rounded-full"
         />
         <div className="text-sm">
-          <p className="font-medium text-gray-800">Sabrina Fonseca</p>
+          <p className="font-medium text-gray-800">João Lafetá</p>
           <p className="text-gray-500">Gerente comercial</p>
         </div>
       </div>
