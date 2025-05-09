@@ -2,6 +2,10 @@
 from fastapi.middleware.cors import CORSMiddleware  # Importe o middleware
 from app.routes import api_router
 from app.core.database import engine, Base
+from app.routes.api import router as api_router
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="ProdWise API", version="0.1.0")
 
@@ -13,6 +17,7 @@ app.add_middleware(
     allow_methods=["*"],  # GET, POST, PUT, DELETE, etc.
     allow_headers=["*"],  # Todos os headers
 )
+app.include_router(api_router)
 
 # Configuração do banco (síncrona)
 @app.on_event("startup")

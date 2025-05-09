@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+
+# VS Code
+.vscode/
+
+# Env files
+.env
+.env.*
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+env.bak/
+env/
+
+# Database
+*.db
+*.sqlite3
+/data/*.db
+
+# Modelos treinados
+*.joblib
+models/*.joblib
+app/models/*.joblib
+
+# Logs
+*.log
+
+# Mac/Windows
+.DS_Store
+Thumbs.db.env

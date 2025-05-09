@@ -61,6 +61,8 @@ def treinar_classificador():
     joblib.dump(modelo, MODEL_PATH)
 
 def verificar_pergunta(texto: str) -> bool:
+    print("🛠️ Buscando vectorizer em:", VEC_PATH)
+    print("🛠️ Buscando modelo em:", MODEL_PATH)
     vectorizer = joblib.load(VEC_PATH)
     modelo = joblib.load(MODEL_PATH)
     texto_limpo = normalizar_texto(texto)

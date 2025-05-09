@@ -450,3 +450,26 @@ class MLService:
         )
         
         return future_data
+    
+    def get_previsoes_produto(self, product_id: str, limit: int = 3) -> list[dict]:
+        """
+        Retorna as últimas previsões desnormalizadas do produto A ou B
+        """
+        product_id = product_id.lower()
+        df = self.predict_sales_for_2025(product_id)
+
+        target_col = f'vendas_{product_id}'
+        ultimos = df.sort_values("data", ascending=False).head(limit)
+
+        # Desnormalizar os valores
+        df_denorm = self.inverse_transform_target(ultimos[[target_col]], target_col)
+        valores_reais = df_denorm[target_col].values.tolist()
+
+        return [
+            {
+                "data": d.strftime("%Y-%m-%d"),
+                "produto": product_id.upper(),
+                "previsao": round(v, 2)
+            }
+            for d, v in zip(ultimos["data"], valores_reais)
+        ]

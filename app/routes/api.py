@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.models.dados import DadosConsolidados
 from app.core.database import get_db
+from pydantic import BaseModel
 from app.services.ml_service import MLService
+from app.services.api.chat_service import montar_contexto, chamar_claude
+from app.services.api.intent_classifier import verificar_pergunta
 
 router = APIRouter(prefix="/api/v1")
 
@@ -91,3 +94,18 @@ async def forecast_2025(product_id: str, db: Session = Depends(get_db)):
         }
     except ValueError as e:
         return {"status": "error", "message": str(e)}
+
+class ChatRequest(BaseModel):
+    pergunta: str
+
+@router.post("/chat")
+def responder_chat(request: ChatRequest, db: Session = Depends(get_db)):
+    try:
+        if not verificar_pergunta(request.pergunta):
+            return {"resposta": "Desculpa, não consigo responder isso."}
+    except Exception as e:
+        return {"resposta": f"Erro ao classificar pergunta: {str(e)}"}
+
+    contexto = montar_contexto(db)
+    resposta = chamar_claude(request.pergunta, contexto)
+    return {"resposta": resposta}
