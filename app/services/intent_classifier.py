@@ -1,5 +1,6 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from pathlib import Path
 import joblib
 import os
 import unicodedata
@@ -7,10 +8,11 @@ import re
 
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+MODELS_DIR = PROJECT_ROOT / "models"
+VEC_PATH = MODELS_DIR / "vectorizer.joblib"
+MODEL_PATH = MODELS_DIR / "intent_model.joblib"
 
-VEC_PATH = os.path.join(BASE_DIR, "vectorizer.joblib")
-MODEL_PATH = os.path.join(BASE_DIR, "intent_model.joblib")
 
 def normalizar_texto(texto):
     texto = texto.lower()  # tudo minúsculo
