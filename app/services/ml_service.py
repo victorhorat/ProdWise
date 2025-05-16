@@ -381,75 +381,95 @@ class MLService:
         
         return future_dates_df
     
-    def predict_sales_for_2025(self, product_id: str) -> pd.DataFrame:
+    def predict_sales_for_2025(self, product_id: str, k_neighbors: int = 1) -> pd.DataFrame:
         """
-        Faz previsão de vendas para 2025 usando padrões sazonais de múltiplos anos
+        Prevê vendas mensais para o ano de 2025 usando KNN Regressor.
+        
+        Args:
+            product_id: 'a' ou 'b' para o produto específico
+            k_neighbors: número de vizinhos a considerar no KNN
+            
+        Returns:
+            DataFrame com previsões de vendas para 2025
         """
         product_id = product_id.lower()
+        if product_id not in ['a', 'b']:
+            raise ValueError("ID do produto deve ser 'a' ou 'b'")
         
-        # Obter dados históricos normalizados
-        data = self.normalize_data(update_scalers=False)
+        # 1. Obter dados do banco
+        df = self._get_data_from_db()
         
-        # Converter datas
-        data_targets = data['targets'].copy()
-        data_targets['data'] = pd.to_datetime(data_targets['data'])
+        # Converter coluna de data para datetime (se necessário)
+        df['data'] = pd.to_datetime(df['data'])
         
-        # Filtrar para dados de 2016-2024 (ou o período disponível)
-        historical_data = data_targets[
-            (data_targets['data'].dt.year >= 2016) & 
-            (data_targets['data'].dt.year <= 2024)
+        # 2. Usar todos os dados disponíveis para treino
+        train_data = df.copy()
+        
+        # 3. Definir qual coluna é o target com base no produto selecionado
+        if product_id == 'a':
+            target_col = 'vendas_a'
+            other_product = 'b'
+        else:  # product_id == 'b'
+            target_col = 'vendas_b'
+            other_product = 'a'
+        
+        # 4. Definir colunas a serem removidas:
+        cols_para_remover = [
+            'data',                      # Não usar data como feature
+            target_col,                  # Remover o target (será nosso y)
+            f'vendas_{other_product}',   # Remover vendas do outro produto
+            f'estoque_{product_id}',     # Remover estoque do produto atual
+            f'estoque_{other_product}'   # Remover estoque do outro produto
         ]
         
-        # Calcular padrões sazonais médios por mês
-        target_col = f'vendas_{product_id}'
-        seasonal_patterns = {}
+        # 5. Separar features (X) e target (y)
+        X_train = train_data.drop(columns=cols_para_remover)
+        y_train = train_data[target_col]
         
+        # 6. Treinar o modelo KNN
+        model = KNeighborsRegressor(n_neighbors=k_neighbors)
+        model.fit(X_train, y_train)
+        
+        # 7. Criar dados para 2025
+        future_dates = self._create_future_dates()
+        
+        # 8. Criar features para 2025 baseadas nos dois últimos anos (2023-2024)
+        # Filtramos apenas os dados dos últimos 2 anos
+        data_2023_2024 = df[df['data'].dt.year >= 2023]
+
+        # Extrair mês de cada data
+        data_2023_2024['mes'] = data_2023_2024['data'].dt.month
+
+        # Criar DataFrame para armazenar as features mensais para 2025
+        X_future = pd.DataFrame(index=range(12), columns=X_train.columns)
+
+        # Para cada mês de 2025, calcular as features baseadas na média desse mesmo mês nos últimos 2 anos
         for month in range(1, 13):
-            # Obter todos os valores históricos para este mês
-            month_values = historical_data[historical_data['data'].dt.month == month][target_col]
+            # Filtrar dados dos últimos 2 anos para este mês específico
+            month_data = data_2023_2024[data_2023_2024['mes'] == month]
             
-            # Se houver dados suficientes, calcular a média
-            if len(month_values) > 0:
-                seasonal_patterns[month] = month_values.mean()
-            else:
-                # Fallback para caso não haja dados de algum mês
-                seasonal_patterns[month] = 0.5  # valor default
-        
-        # Calcular tendência anual
-        yearly_averages = historical_data.groupby(historical_data['data'].dt.year)[target_col].mean()
-        
-        # Se houver pelo menos 2 anos de dados, calcular taxa de crescimento anual
-        if len(yearly_averages) >= 2:
-            # Calcular taxa de crescimento média anual
-            growth_rates = []
-            for i in range(1, len(yearly_averages)):
-                if yearly_averages.iloc[i-1] > 0:  # Evitar divisão por zero
-                    yearly_growth = (yearly_averages.iloc[i] / yearly_averages.iloc[i-1]) - 1
-                    growth_rates.append(yearly_growth)
+            # Obter apenas as colunas de features
+            month_features = month_data.drop(columns=cols_para_remover + ['mes'])
             
-            # Média das taxas de crescimento (ou valor padrão se não houver dados suficientes)
-            average_growth = np.mean(growth_rates) if growth_rates else 0.02
-        else:
-            # Valor padrão se não houver dados suficientes
-            average_growth = 0.02  # 2% de crescimento anual como default
-        
-        # Ajustar crescimento para ficar em intervalo razoável
-        average_growth = max(-0.10, min(0.15, average_growth))  # limitar entre -10% e +15%
-        
-        # Gerar datas para 2025
-        future_data = self._create_future_dates(2025, 1, 12)
-        
-        # Aplicar padrão sazonal + tendência para cada mês
-        future_data[target_col] = future_data['data'].dt.month.apply(
-            lambda month: seasonal_patterns[month] * (1 + average_growth)
-        )
-        
-        # Garantir que os valores estão no intervalo [0, 1]
-        future_data[target_col] = future_data[target_col].apply(
-            lambda x: max(0.0, min(1.0, x))
-        )
-        
-        return future_data
+            # Calcular a média de cada feature para este mês nos últimos 2 anos
+            if len(month_features) > 0:  # Verificar se temos dados para este mês
+                month_avg_features = month_features.mean().to_dict()
+                
+                # Atribuir os valores médios ao mês correspondente em X_future
+                for col in X_train.columns:
+                    X_future.loc[month-1, col] = month_avg_features.get(col, 0)
+
+        # 9. Fazer previsão para 2025
+        predictions = model.predict(X_future)
+
+        # 10. Criar DataFrame final com data e vendas
+        result = pd.DataFrame({
+            'data': future_dates['data'],
+            target_col: predictions  # Usar o nome correto da coluna para compatibilidade
+        })
+
+        return result
+    
     
     def get_previsoes_produto(self, product_id: str, limit: int = 3) -> list[dict]:
         """
