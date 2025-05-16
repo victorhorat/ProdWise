@@ -44,6 +44,7 @@ ProdWise/
 │   ├── __init__.py
 │   ├── core/
 │   │   ├── config.py       # Configurações globais
+│   │   ├── __init__.py     
 │   │   └── database.py     # Conexão com DB (SQLAlchemy)
 │   ├── models/
 │   │   ├── __init__.py
@@ -51,9 +52,13 @@ ProdWise/
 │   │   └── dados.py        # Modelos de dados
 │   ├── routes/
 │   │   ├── __init__.py
-│   │   ├── api.py          # Endpoints FastAPI
-│   │   └── views.py        # Templates (se houver front)
+│   │   └── api.py          # Endpoints FastAPI
 │   ├── services/
+│   │   ├── api/            # servico de chatbot AI
+│   │   │   ├── __init__.py
+│   │   │   ├── chat_service.py
+│   │   │   └── intent_classifier.py
+│   │   │   
 │   │   ├── __init__.py
 │   │   ├── data_service.py # Lógica de dados
 │   │   └── ml_service.py   # Serviços de ML
