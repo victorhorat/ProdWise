@@ -100,12 +100,12 @@ class ChatRequest(BaseModel):
 
 @router.post("/chat")
 def responder_chat(request: ChatRequest, db: Session = Depends(get_db)):
-    try:
-        if not verificar_pergunta(request.pergunta):
-            return {"resposta": "Desculpa, não consigo responder isso."}
-    except Exception as e:
-        return {"resposta": f"Erro ao classificar pergunta: {str(e)}"}
+    if not verificar_pergunta(request.pergunta):
+        return {"resposta": "Desculpa, não consigo responder isso."}
 
-    contexto = montar_contexto(db)
-    resposta = chamar_claude(request.pergunta, contexto)
-    return {"resposta": resposta}
+    try:
+        contexto = montar_contexto(db)
+        resposta = chamar_claude(request.pergunta, contexto)
+        return {"resposta": resposta}
+    except Exception as e:
+        return {"resposta": f"Erro ao gerar resposta: {str(e)}"}
