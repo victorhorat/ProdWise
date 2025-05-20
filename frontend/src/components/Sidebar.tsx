@@ -12,13 +12,10 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { icon: <Home size={20} />, label: 'Home', href: '/dashboard' },
-  { icon: <Box size={20} />, label: 'Produtos', href: '/produtos' },
+  { icon: <Home size={20} />, label: 'Home', href: '/Home' },
   { icon: <Clock size={20} />, label: 'Histórico', href: '/historico' },
-  { icon: <Map size={20} />, label: 'Mapa', href: '/mapa' },
-  { icon: <FlaskConical size={20} />, label: 'Experimentos', href: '/experimentos' },
   { icon: <Settings size={20} />, label: 'Configurações', href: '/configuracoes' },
-  { icon: <LogOut size={20} />, label: 'Sair', href: '/logout' },
+  { icon: <LogOut size={20} />, label: 'Sair', href: '/Login' },
 ];
 
 export default function Sidebar() {

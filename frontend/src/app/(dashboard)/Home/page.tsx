@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import DemandChart from '@/components/ClientDemandChart';
 import ProductChart from '@/components/ClientProductChart';
-import ChatWidget from '@/components/ChatWidget';
+import ChatAI from '@/components/ChatAI';
 
 
 type DateRange = {
@@ -34,7 +34,7 @@ export default function DashboardPage() {
           <ProductChart dateRange={dateRange} />
         </div>
       </div>
-      <ChatWidget />
+      <ChatAI />
     </div>
   );
 }
