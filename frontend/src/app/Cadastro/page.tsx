@@ -1,9 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function SignupPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert('As senhas não coincidem.');
+      return;
+    }
+
+    // Simula cadastro (substituir por lógica real)
+    if (name && email && password) {
+      localStorage.setItem('user', JSON.stringify({ name, email, password }));
+      router.push('/Login');
+    } else {
+      alert('Preencha todos os campos.');
+    }
+  };
+
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Lado Esquerdo */}
@@ -18,28 +42,36 @@ export default function SignupPage() {
       <div className="w-1/2 bg-white flex flex-col justify-center px-16">
         <h2 className="text-xl font-semibold text-center mb-6">Crie sua conta</h2>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Nome completo"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
 
           <input
             type="email"
             placeholder="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
 
           <input
             type="password"
             placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
 
           <input
             type="password"
             placeholder="Confirmar senha"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
 
